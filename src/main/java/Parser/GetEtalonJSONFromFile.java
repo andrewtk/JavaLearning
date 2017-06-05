@@ -81,20 +81,36 @@ public class GetEtalonJSONFromFile {
         int lengthJson=rootNode.size();
         //keysEtalonJson;
         Iterator<String> list = rootNode.getFieldNames();
-        ArrayList<String> keys = new ArrayList<String>();
+        Object[] Key = new Object[2];
+
+        ArrayList<Key> keys = new ArrayList<Key>();
+
 
         //проходим по json и собираем ключи и значения
         while (list.hasNext()){
             String fieldName= list.next();
+            list.
 
-            keys.add(rootNode.get(fieldName).asText());
+            keys.add(rootNode.get(fieldName).asText()); // получили значение
 
 
 
         }
 
-        for (int i = 0; i< lengthJson; i++){
-            if (keysEtalonJson[i].contains(".")) {
+        for (int i = 0; i< keys.size(); i++){
+            /*if (keys.get(i).contains(".")) {
+
+                st1 = keys.get(i).split("\\.");
+                message = rootNode.get(st1[0])
+                        .get(st1[1]).
+                                asText(); // получение строки из поля "message"
+            }
+            else
+            */    {
+                message = keys.get(i); // получение строки из поля "message"
+            }
+                /*
+                if (keysEtalonJson[i].contains(".")) {
                 st1 = keysEtalonJson[i].split("\\.");
                 message = rootNode.get(st1[0])
                         .get(st1[1]).
@@ -104,15 +120,16 @@ public class GetEtalonJSONFromFile {
                 message = rootNode.get(keysEtalonJson[i]).asText(); // получение строки из поля "message"
             }
             //message=message+"/n";
+            */
 
 
             //JsonNode childNode =  rootNode.get("place"); // получаем объект Place
             //String place = childNode.get("name").asText(); // получаем строку из поля "name"
-            System.out.println(keysEtalonJson[i] + " " + message); // напечатает "Hi World!"Ovj
+            System.out.println(keys.get(i) + " " + keys + "/n"); // напечатает "Hi World!"Ovj
 
             //result = mapper.createObjectNode();
 
-            result.put(keysEtalonJson[i], message);
+            //result.put(keysEtalonJson[i], message);
         }
         return keysEtalonJson;
 
