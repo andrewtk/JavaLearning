@@ -1,19 +1,19 @@
 package Parser;
 
-import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.node.ObjectNode;
-import org.w3c.dom.NameList;
+import org.codehaus.jackson.type.TypeReference;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Created by a.tkachuk on 03.06.2017.
@@ -47,98 +47,65 @@ public class GetEtalonJSONFromFile {
 
     private static ObjectMapper mapper = new ObjectMapper();
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
         String fileName = "etalonJson.json";
-        EtalonJson(fileName);
+        String jsonStringFromServer="";
+        Map<String,String> jsonFromFile = loadEtalonJson(fileName);
+        Map<String,String> jsonFromServer = loadJsonFromServer();
+
+        while  ( !(jsonFromServer.isEmpty())){
+            System.out.print(jsonFromServer.get(jsonStringFromServer));
+        }
+        System.out.print(jsonFromServer);
+
 
     }
 
-    public static JsonNode EtalonJson( String etalonJsonFileName) {
+    public static Map<String,String> loadEtalonJson(String etalonJsonFileName) {
+        //String fileDir = "D:\\loyverseen\\ownercub\\i18";
+        String fileDir = "D:\\";
 
-        String fileDir = "D:\\loyverseen\\ownercub\\i18";
-        JsonNode rootNode1 = mapper.createObjectNode();
-        ObjectNode rootNode = mapper.createObjectNode();
+        Map<String, String> map = new HashMap<>();
 
+        String fileName = fileDir + File.separator + etalonJsonFileName;
+        String content = "";
         try {
-            String fileName = fileDir + File.separator + etalonJsonFileName;
-            String content = Files.readAllLines(Paths.get(fileName)).stream().collect(Collectors.joining());
-            rootNode1 = mapper.readTree(content);
-            rootNode = (ObjectNode) rootNode1;
-            processFile(rootNode, fileName);
-
+            content = Files.readAllLines(Paths.get(fileName)).stream().collect(Collectors.joining());
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return rootNode;
+
+        return convertJsonToMap(content);
     }
 
-    private static String[] processFile(ObjectNode rootNode, String name) throws IOException {
-        String message;
-        String[]st1;
-        ObjectNode result = mapper.createObjectNode();
+    public static Map<String,String> loadJsonFromServer() throws Exception {
+        //TODO: Load data from server
+        String data = "";
+        data = LoginServer.loginAndGetJsonFromServer();
 
-        //формируем массив ключей эталонного Json
-        int lengthJson=rootNode.size();
-        //keysEtalonJson;
-        Iterator<String> list = rootNode.getFieldNames();
-        Object[] Key = new Object[2];
+        return convertJsonToMap(data);
+    }
 
-        ArrayList<Key> keys = new ArrayList<Key>();
+    static Map<String,String> convertJsonToMap(String json){
+        Map<String, String> map = new HashMap<>();
 
 
-        //проходим по json и собираем ключи и значения
-        while (list.hasNext()){
-            String fieldName= list.next();
-            list.
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            // convert JSON string to Map
+            map = mapper.readValue(json, new TypeReference<Map<String, String>>(){});
 
-            keys.add(rootNode.get(fieldName).asText()); // получили значение
+            System.out.println(map);
 
-
-
+        } catch (JsonGenerationException e) {
+            e.printStackTrace();
+        } catch (JsonMappingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
-        for (int i = 0; i< keys.size(); i++){
-            /*if (keys.get(i).contains(".")) {
-
-                st1 = keys.get(i).split("\\.");
-                message = rootNode.get(st1[0])
-                        .get(st1[1]).
-                                asText(); // получение строки из поля "message"
-            }
-            else
-            */    {
-                message = keys.get(i); // получение строки из поля "message"
-            }
-                /*
-                if (keysEtalonJson[i].contains(".")) {
-                st1 = keysEtalonJson[i].split("\\.");
-                message = rootNode.get(st1[0])
-                        .get(st1[1]).
-                                asText(); // получение строки из поля "message"
-            }
-            else{
-                message = rootNode.get(keysEtalonJson[i]).asText(); // получение строки из поля "message"
-            }
-            //message=message+"/n";
-            */
-
-
-            //JsonNode childNode =  rootNode.get("place"); // получаем объект Place
-            //String place = childNode.get("name").asText(); // получаем строку из поля "name"
-            System.out.println(keys.get(i) + " " + keys + "/n"); // напечатает "Hi World!"Ovj
-
-            //result = mapper.createObjectNode();
-
-            //result.put(keysEtalonJson[i], message);
-        }
-        return keysEtalonJson;
-
-
-
-        //String fileName = "result"+ File.separator+name;
-        //Files.write(Paths.get(fileName), result.toString().getBytes());
-
-
+        return map;
     }
 
 
