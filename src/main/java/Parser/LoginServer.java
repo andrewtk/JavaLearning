@@ -71,7 +71,8 @@ public class LoginServer {
             user = "testiro",
             password = "Ntcnbyu16";
 
-    public static void main(String[] args){
+    public static void main(String[] args) throws Exception {
+        String jsonStringFromServer = loginAndGetJsonFromServer();
 
     }
 
@@ -85,6 +86,7 @@ public class LoginServer {
                 .build();
         try {
             //HttpGet httpget = new HttpGet("https://devr.loyverse.com/data/cabinetlogin");
+            //
             HttpPost httpPost = new HttpPost("https://devr.loyverse.com/data/cabinetlogin");
             httpPost.setEntity(new StringEntity("{\"dontRemember\":false,\"devId\":null,\"email\":\"loyversetester@gmail.com\",\"password\":\"qwerty\",\"type\":\"pos\",\"lang\":\"eng\"}"));
             System.out.println("Executing request " + httpPost.getRequestLine());
@@ -99,7 +101,21 @@ public class LoginServer {
                     System.out.println("Wrong login or password");
                 System.out.println(responseText);
 
-                return responseText;
+                //устанавливаем новый запрос
+                HttpPost httpPostReport = new HttpPost("https://devr.loyverse.com/data/ownercab/getearningsreport");
+                // отправляем запрос из файла
+                String request ="{\"merchantsIds\":\"all\",\"outletsIds\":\"all\",\"startDate\":1460926800000,\"endDate\":1461185999000,\"tzOffset\":10800000,\"tzName\":\"Europe/Kiev\",\"startTime\":0,\"endTime\":6,\"divider\":\"day\",\"limit\":\"10\",\"offset\":0}";//{"merchantsIds":"all","outletsIds":"all","startDate":1460926800000,"endDate":1461185999000,"tzOffset":10800000,"tzName":"Europe/Kiev","startTime":0,"endTime":6,"divider":"day","limit":"10","offset":0};
+                httpPostReport.setEntity(new StringEntity(request));
+                // получаем ответ
+                CloseableHttpResponse responseReport = httpclient.execute(httpPostReport);
+                //сравниваем полученный ответ и эталон из файла
+                System.out.println("----------------------------------------");
+                System.out.println(responseReport.getStatusLine());
+                String responseReportText = EntityUtils.toString(responseReport.getEntity());
+                System.out.println(responseReportText);
+                responseReport.close();
+
+                return responseReportText;
             } finally {
                 response.close();
             }
